@@ -44,7 +44,18 @@ void write_symbol(FILE* output, uint32_t addr, const char* name) {
    to store this value for use during add_to_table().
  */
 SymbolTable* create_table(int mode) {
-    /* YOUR CODE HERE */
+    SymbolTable * s = (SymbolTable*) malloc(sizeof(SymbolTable));
+    if (!s) {
+        allocation_failed();
+    }
+    s->tbl = (Symbol*) malloc(INITIAL_SIZE*sizeof(Symbol));
+    if (!s->tbl) {
+        allocation_failed();
+    }
+    s->len = 0;
+    s->cap = INITIAL_SIZE;
+    s->mode = mode;
+    return s;
 }
 
 /* Frees the given SymbolTable and all associated memory. */
@@ -78,8 +89,37 @@ static char* create_copy_of_str(const char* str) {
    Otherwise, you should store the symbol name and address and return 0.
  */
 int add_to_table(SymbolTable* table, const char* name, uint32_t addr) {
-    /* YOUR CODE HERE */
-    return -1;
+    if (!table || !name || !table->tbl) {
+        return -1;
+    }
+    if (addr % 4) {
+        addr_alignment_incorrect();
+        return -1;
+    }
+    if (SYMTBL_UNIQUE_NAME) {
+        for(int i = 0; i<table->len; i++) {
+            if (strcmp(table->tbl[i].name, name) == 0) {
+                name_already_exists(name);
+                return -1;
+            }
+        }
+    }
+    if (table->len == table->cap) {
+        table = realloc(table, table->len*SCALING_FACTOR*sizeof(Symbol));
+        if (!table) {
+            allocation_failed();
+        }
+        table->cap *= SCALING_FACTOR;
+    }
+    Symbol * mapping = (Symbol*) malloc(sizeof(Symbol));
+    if (!mapping) {
+        allocation_failed();
+    }
+    mapping->name = create_copy_of_str(name);
+    mapping->addr = addr;
+    table->tbl[table->len] = *mapping;
+    table->len += 1;
+    return 0;
 }
 
 /* Returns the address (byte offset) of the given symbol. If a symbol with name
