@@ -16,6 +16,8 @@ afa80000
 00005012
 
 .symbol
+16	L1
+20	L2
 
 .relocation
 44	L1
