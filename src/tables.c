@@ -60,7 +60,14 @@ SymbolTable* create_table(int mode) {
 
 /* Frees the given SymbolTable and all associated memory. */
 void free_table(SymbolTable* table) {
-    /* YOUR CODE HERE */
+    if (!table) {
+        return;
+    }
+    for(int i = 0; i<table->len; i++) {
+        free(table->tbl[i].name);      
+    }
+    free(table->tbl);
+    free(table);
 }
 
 /* A suggested helper function for copying the contents of a string. */
@@ -96,7 +103,7 @@ int add_to_table(SymbolTable* table, const char* name, uint32_t addr) {
         addr_alignment_incorrect();
         return -1;
     }
-    if (SYMTBL_UNIQUE_NAME) {
+    if (table->mode == SYMTBL_UNIQUE_NAME) {
         for(int i = 0; i<table->len; i++) {
             if (strcmp(table->tbl[i].name, name) == 0) {
                 name_already_exists(name);
@@ -105,8 +112,8 @@ int add_to_table(SymbolTable* table, const char* name, uint32_t addr) {
         }
     }
     if (table->len == table->cap) {
-        table = realloc(table, table->len*SCALING_FACTOR*sizeof(Symbol));
-        if (!table) {
+        table->tbl = realloc(table->tbl, table->len*SCALING_FACTOR*sizeof(Symbol)); 
+        if (!table->tbl) {
             allocation_failed();
         }
         table->cap *= SCALING_FACTOR;
@@ -126,7 +133,11 @@ int add_to_table(SymbolTable* table, const char* name, uint32_t addr) {
    NAME is not present in TABLE, return -1.
  */
 int64_t get_addr_for_symbol(SymbolTable* table, const char* name) {
-    /* YOUR CODE HERE */
+    for(int i = 0; i<table->len; i++) {
+        if (strcmp(table->tbl[i].name, name) == 0) {
+            return table->tbl[i].addr;
+        }
+    }
     return -1;   
 }
 
@@ -134,5 +145,7 @@ int64_t get_addr_for_symbol(SymbolTable* table, const char* name) {
    perform the write. Do not print any additional whitespace or characters.
  */
 void write_table(SymbolTable* table, FILE* output) {
-    /* YOUR CODE HERE */
+    for(int i = 0; i<table->len; i++) {
+        write_symbol(output, table->tbl[i].addr, table->tbl[i].name);
+    }  
 }
