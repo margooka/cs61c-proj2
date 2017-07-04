@@ -41,22 +41,60 @@ const int TWO_POW_SEVENTEEN = 131072;    // 2^17
    Returns the number of instructions written (so 0 if there were any errors).
  */
 unsigned write_pass_one(FILE* output, const char* name, char** args, int num_args) {
-    if (strcmp(name, "li") == 0) {
-        /* YOUR CODE HERE */
+    if (!args || !name) {
+      return 0;
+    }
+    for (int i = 0; i < num_args; i++) {
+      if (!arg[i]) {
         return 0;
-        //https://stackoverflow.com/questions/15957678/how-to-pop-from-the-stack-in-mips-assembly
+      }
+    }
+    if (strcmp(name, "li") == 0) {
+        if (num_args != 2) {
+            return 0;
+        }
+        if (args[1] < TWO_POW_SEVENTEEN) {
+            fprintf(output, "addiu %s %s $0\n", args[0], args[1]);
+            return 1;
+        }
+        else {
+            fprintf(output, "lui %s %s\n", args[0], args[1]);
+            fprintf(output, "ori %s %s\n", args[0], args[1]);
+            return 2;
+        }
     } else if (strcmp(name, "push") == 0) {
         /* YOUR CODE HERE */
-        return 0;  
+        if (num_args != 1) {
+          return 0;
+        }
+        fprintf(output, "addiu $sp $sp -4\n");
+        fprintf(output, "sw %s 0($sp)\n", args[0]);
+        return 2;  
     } else if (strcmp(name, "pop") == 0) {
         /* YOUR CODE HERE */
-        return 0;  
+        if (num_args != 1) {
+          return 0;
+        }
+        fprintf(output, "lw %s 0($sp)\n", args[0]);
+        fprintf(output, "addiu $sp, $sp, 4\n");
+        return 2;  
     } else if (strcmp(name, "mod") == 0) {
         /* YOUR CODE HERE */
-        return 0;  
+        if (num_args != 3) {
+          return 0;
+        }
+        fprintf(output, "div %s %s\n", args[1], args[2]);
+        fprintf(output, "mfhi %s\n", args[0]);
+        return 2;  
     } else if (strcmp(name, "subu") == 0) {
         /* YOUR CODE HERE */
-        return 0;
+        if (num_args != 3) {
+          return 0;
+        }
+        fprintf(output, "addiu $at $0 -1\n");
+        fprintf(output, "xor $at $at %s\n", args[2]);
+        fprintf(output, "addiu $at $at 1\n");
+        fprintf(output, "addu %s %s $at\n", args[0], args[1]);
     }
     write_inst_string(output, name, args, num_args);
     return 1;
@@ -167,7 +205,7 @@ int write_rtype(uint8_t funct, FILE* output, char** args, size_t num_args) {
  */
 int write_shift(uint8_t funct, FILE* output, char** args, size_t num_args) {
 	// Perhaps perform some error checking?
-  if (!args || num_args != 3) {
+    if (!args || num_args != 3) {
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
