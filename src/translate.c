@@ -45,7 +45,7 @@ unsigned write_pass_one(FILE* output, const char* name, char** args, int num_arg
       return 0;
     }
     for (int i = 0; i < num_args; i++) {
-      if (!arg[i]) {
+      if (!args[i]) {
         return 0;
       }
     }
@@ -53,7 +53,9 @@ unsigned write_pass_one(FILE* output, const char* name, char** args, int num_arg
         if (num_args != 2) {
             return 0;
         }
-        if (args[1] < TWO_POW_SEVENTEEN) {
+        long int imm;
+        translate_num(&imm, args[2], INT16_MIN, INT16_MAX);
+        if (imm < TWO_POW_SEVENTEEN) {
             fprintf(output, "addiu %s %s $0\n", args[0], args[1]);
             return 1;
         }
@@ -156,8 +158,8 @@ int translate_inst(FILE* output, const char* name, char** args, size_t num_args,
     else if (strcmp(name, "sw") == 0)    return write_mem (0x2b, output, args, num_args);
     else if (strcmp(name, "beq") == 0)   return write_branch (0x04, output, args, num_args, addr, symtbl);
     else if (strcmp(name, "bne") == 0)   return write_branch (0x05, output, args, num_args, addr, symtbl);
-    else if (strcmp(name, "j") == 0)     return write_jump (0x02, output, args, num_args, reltbl);
-    else if (strcmp(name, "jal") == 0)   return write_jump (0x03, output, args, num_args, reltbl);
+    else if (strcmp(name, "j") == 0)     return write_jump (0x02, output, args, num_args, addr, reltbl);
+    else if (strcmp(name, "jal") == 0)   return write_jump (0x03, output, args, num_args, addr, reltbl);
     else if (strcmp(name, "mult") == 0)  return write_mult_div (0x18, output, args, num_args);
     else if (strcmp(name, "div") == 0)   return write_mult_div (0x1a, output, args, num_args);
     else if (strcmp(name, "mfhi") == 0)  return write_mfhi_mflo (0x10, output, args, num_args);
@@ -178,7 +180,7 @@ int write_rtype(uint8_t funct, FILE* output, char** args, size_t num_args) {
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
-      if (!arg[i]) {
+      if (!args[i]) {
         return -1;
       }
     }
@@ -187,11 +189,7 @@ int write_rtype(uint8_t funct, FILE* output, char** args, size_t num_args) {
     int rs = translate_reg(args[1]);
     int rt = translate_reg(args[2]);
 
-    uint32_t instruction = funct;
-    instruction += (rd << 11);
-    instruction += (rt << 16); 
-    instruction += (rs << 21);
-
+    uint32_t instruction = funct + (rd << 11) + (rt << 16) + (rs << 21);
     write_inst_hex(output, instruction);
     return 0;
 }
@@ -209,7 +207,7 @@ int write_shift(uint8_t funct, FILE* output, char** args, size_t num_args) {
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
-      if (!arg[i]) {
+      if (!args[i]) {
         return -1;
       }
     }
@@ -224,7 +222,6 @@ int write_shift(uint8_t funct, FILE* output, char** args, size_t num_args) {
 
     uint32_t instruction = funct + (shamt << 6) + (rd << 11) + (rt << 16);
     write_inst_hex(output, instruction);
-
     return 0;
 }
 
@@ -249,7 +246,7 @@ int write_addiu(uint8_t opcode, FILE* output, char** args, size_t num_args) {
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
-      if (!arg[i]) {
+      if (!args[i]) {
         return -1;
       }
     }
@@ -273,7 +270,7 @@ int write_ori(uint8_t opcode, FILE* output, char** args, size_t num_args) {
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
-      if (!arg[i]) {
+      if (!args[i]) {
         return -1;
       }
     }
@@ -297,7 +294,7 @@ int write_mult_div(uint8_t funct, FILE* output, char** args, size_t num_args) {
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
-      if (!arg[i]) {
+      if (!args[i]) {
         return -1;
       }
     }
@@ -309,7 +306,7 @@ int write_mult_div(uint8_t funct, FILE* output, char** args, size_t num_args) {
 		return -1;
 	}
 			    
-	uint32_t instruction = funt + (rt << 16) + (rt << 21);
+	uint32_t instruction = funct + (rt << 16) + (rt << 21);
 	write_inst_hex(output, instruction);
 	return 0;
 }
@@ -325,7 +322,7 @@ int write_mfhi_mflo(uint8_t funct, FILE* output, char** args, size_t num_args) {
 		return -1;
 	}
 
-	uint32_t instruction = funt + (rd << 11);
+	uint32_t instruction = funct + (rd << 11);
 	write_inst_hex(output, instruction);
 	return 0;
 }
@@ -336,7 +333,7 @@ int write_lui(uint8_t opcode, FILE* output, char** args, size_t num_args) {
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
-      if (!arg[i]) {
+      if (!args[i]) {
         return -1;
       }
     }
@@ -359,7 +356,7 @@ int write_mem(uint8_t opcode, FILE* output, char** args, size_t num_args) {
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
-      if (!arg[i]) {
+      if (!args[i]) {
         return -1;
       }
     }
@@ -392,7 +389,7 @@ int write_branch(uint8_t opcode, FILE* output, char** args, size_t num_args, uin
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
-      if (!arg[i]) {
+      if (!args[i]) {
         return -1;
       }
     }
@@ -405,7 +402,7 @@ int write_branch(uint8_t opcode, FILE* output, char** args, size_t num_args, uin
     }
     //Please compute the branch offset using the MIPS rules.
     int32_t offset = (addr - label_addr) / 4;;
-    uint32_t instruction = offset + (rt << 16) + (rs << 21) << (opcode << 26);
+    uint32_t instruction = offset + (rt << 16) + (rs << 21) + (opcode << 26);
     write_inst_hex(output, instruction);        
     return 0;
 }

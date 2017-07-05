@@ -179,7 +179,9 @@ int pass_one(FILE* input, FILE* output, SymbolTable* symtbl) {
    the document, and at the end, return -1. Return 0 if no errors were encountered. */
 int pass_two(FILE *input, FILE* output, SymbolTable* symtbl, SymbolTable* reltbl) {
     /* YOUR CODE HERE */
-
+    if (!input || !output || !symtbl || !reltbl) {
+        return -1;
+    }
     /* Since we pass this buffer to strtok(), the characters in this buffer will
        GET CLOBBERED. */
     char buf[BUF_SIZE];
@@ -196,23 +198,36 @@ int pass_two(FILE *input, FILE* output, SymbolTable* symtbl, SymbolTable* reltbl
         char* name = strtok(buf, IGNORE_CHARS);
 
         // Error checking?
+        if (!name) {
+            ret_code = -1;
+        }
 
         /* Parse for instruction arguments. You should use strtok() to tokenize
            the rest of the line. Extra arguments should be filtered out in pass_one(),
            so you don't need to worry about that here. */
         char* args[MAX_ARGS];
-        int num_args = 0;
-
+        int num_args;
+        for (num_args = 0; num_args<MAX_ARGS; num_args++) {
+            char* a = strtok(NULL, IGNORE_CHARS);
+            if (!a) {
+                break;
+            }
+            args[num_args] = a;
+        }
 
         /* Use translate_inst() to translate the instruction and write to output file.
            If an error occurs, the instruction will not be written and you should call
            raise_inst_error(). */
-
-        int num = 0;
+        int t = translate_inst(output, name, args, num_args, byte_offset, symtbl, reltbl);    
+        if (t == -1) {
+             raise_inst_error(input_line, name, args, num_args);
+             ret_code = -1;
+        }
+        byte_offset += 4;
     }
     /* Repeat until no more characters are left */
 
-    return -1;
+    return ret_code;
 }
 
 /*******************************
