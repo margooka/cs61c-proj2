@@ -56,8 +56,7 @@ unsigned write_pass_one(FILE* output, const char* name, char** args, int num_arg
         }
         long int imm;
         translate_num(&imm, args[1], LONG_MIN, LONG_MAX);
-        if (imm < 65536) {
-   //printf("IMMEDIATE THAT IS SMALLER THAN 2^16 is %ld\n", imm);       
+        if (imm < 65536) {      
             fprintf(output, "addiu %s $0 %s\n", args[0], args[1]);
             return 1;
         }
@@ -67,7 +66,6 @@ unsigned write_pass_one(FILE* output, const char* name, char** args, int num_arg
             return 2;
         }
     } else if (strcmp(name, "push") == 0) {
-        /* YOUR CODE HERE */
         if (num_args != 1) {
           return 0;
         }
@@ -75,7 +73,6 @@ unsigned write_pass_one(FILE* output, const char* name, char** args, int num_arg
         fprintf(output, "sw %s 0($sp)\n", args[0]);
         return 2;  
     } else if (strcmp(name, "pop") == 0) {
-        /* YOUR CODE HERE */
         if (num_args != 1) {
           return 0;
         }
@@ -83,7 +80,6 @@ unsigned write_pass_one(FILE* output, const char* name, char** args, int num_arg
         fprintf(output, "addiu $sp $sp 4\n");
         return 2;  
     } else if (strcmp(name, "mod") == 0) {
-        /* YOUR CODE HERE */
         if (num_args != 3) {
           return 0;
         }
@@ -91,7 +87,6 @@ unsigned write_pass_one(FILE* output, const char* name, char** args, int num_arg
         fprintf(output, "mfhi %s\n", args[0]);
         return 2;  
     } else if (strcmp(name, "subu") == 0) {
-        /* YOUR CODE HERE */
         if (num_args != 3) {
           return 0;
         }
@@ -148,7 +143,6 @@ int translate_inst(FILE* output, const char* name, char** args, size_t num_args,
     else if (strcmp(name, "slt") == 0)   return write_rtype (0x2a, output, args, num_args);
     else if (strcmp(name, "sltu") == 0)  return write_rtype (0x2b, output, args, num_args);
     else if (strcmp(name, "sll") == 0)   return write_shift (0x00, output, args, num_args);
-    /* YOUR CODE HERE */
     else if (strcmp(name, "xor") == 0)   return write_rtype(0x26, output, args, num_args);
     else if (strcmp(name, "jr") == 0)    return write_jr (0x08, output, args, num_args);
     else if (strcmp(name, "addiu") == 0) return write_addiu (0x09, output, args, num_args);
@@ -416,7 +410,6 @@ int write_branch(uint8_t opcode, FILE* output, char** args, size_t num_args, uin
 }
 
 int write_jump(uint8_t opcode, FILE* output, char** args, size_t num_args, uint32_t addr, SymbolTable* reltbl) {
-    /* YOUR CODE HERE */
     if (num_args != 1) {
         return -1;
     }
