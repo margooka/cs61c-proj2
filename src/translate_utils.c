@@ -65,7 +65,7 @@ int translate_num(long int* output, const char* str, long int lower_bound,
     char* end;
     long int sig_num = strtol(str, &end, 0);
     
-    if (sig_num < lower_bound || sig_num > upper_bound) {
+    if (*end != '\0' || sig_num < lower_bound || sig_num > upper_bound) {
         return -1;
     }
  //   printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ %ld\n", sig_num);

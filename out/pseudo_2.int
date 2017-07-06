@@ -1,11 +1,14 @@
 addiu $sp $sp -4
 sw $t0 0($sp)
 lw $t0 0($sp)
-addiu $sp, $sp, 4
+addiu $sp $sp 4
 addiu $t0 $t0 3
 div $t1 $t2
 mfhi $t0
-sub $t0 $t1 $t2
+addiu $at $0 -1
+xor $at $at $t2
+addiu $at $at 1
+addu $t0 $t1 $at
 j L1
 jal L2
 mult $t0 $t1
