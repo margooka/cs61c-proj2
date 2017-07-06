@@ -1,0 +1,11 @@
+.text
+23e20000
+23e50000
+23e60000
+23e70000
+
+.symbol
+4	label1
+8	label2
+
+.relocation

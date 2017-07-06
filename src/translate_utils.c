@@ -56,14 +56,16 @@ int is_valid_label(const char* str) {
    function returns 0 if the conversion proceeded without errors, or -1 if an 
    error occurred.
  */
-int translate_num(long int* output, const char* str, long int lower_bound, 
+int translate_num(long int* output, const char* str, long int lower_bound,    
     long int upper_bound) {
+    printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@TRYING TO TRANSLATE%s\n", str);
     if (!str || !output) {
         return -1;
     }
     char* end;
     long int sig_num = strtol(str, &end, 0);
-    if (*end || sig_num < lower_bound || sig_num > upper_bound) {
+    printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%ld\n", sig_num);
+    if (sig_num < lower_bound || sig_num > upper_bound) {
         return -1;
     }
     *output = sig_num;

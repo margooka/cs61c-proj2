@@ -152,11 +152,27 @@ int pass_one(FILE* input, FILE* output, SymbolTable* symtbl) {
 
         // Scan for the instruction name
     	char* token = strtok(buf, IGNORE_CHARS);
-
+        if (!token) {
+            continue;
+        }
+        int is_label = add_if_label(input_line, token, byte_offset, symtbl);
+        if (is_label == -1) {
+            ret_code = -1;
+        }
+        if (is_label != 0) {
+            token = strtok(NULL, IGNORE_CHARS);
+        }
+        if (!token) {
+            continue;
+        }
         // Scan for arguments
         char* args[MAX_ARGS];
         int num_args = 0;
-
+        int p_args = parse_args(input_line, args, &num_args);
+        if (p_args == -1) {
+            ret_code = -1;
+            continue;
+        }
     	// Checks to see if there were any errors when writing instructions
         unsigned int lines_written = write_pass_one(output, token, args, num_args);
         if (lines_written == 0) {
@@ -165,7 +181,7 @@ int pass_one(FILE* input, FILE* output, SymbolTable* symtbl) {
         } 
         byte_offset += lines_written * 4;
     }       
-    return -1;
+    return ret_code;
 }
 
 /* Reads an intermediate file and translates it into machine code. You may assume:
@@ -206,13 +222,10 @@ int pass_two(FILE *input, FILE* output, SymbolTable* symtbl, SymbolTable* reltbl
            the rest of the line. Extra arguments should be filtered out in pass_one(),
            so you don't need to worry about that here. */
         char* args[MAX_ARGS];
-        int num_args;
-        for (num_args = 0; num_args<MAX_ARGS; num_args++) {
-            char* a = strtok(NULL, IGNORE_CHARS);
-            if (!a) {
-                break;
-            }
-            args[num_args] = a;
+        int num_args = 0;
+        int p_args = parse_args(input_line, args, &num_args);
+        if (p_args == -1) {
+            ret_code = -1;
         }
 
         /* Use translate_inst() to translate the instruction and write to output file.

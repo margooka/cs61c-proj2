@@ -1,0 +1,4 @@
+addiu $v0 10 $0
+addiu $a1 -6000 $0
+addiu $a2 80000 $0
+addiu $a3 0xB0BACAFE $0

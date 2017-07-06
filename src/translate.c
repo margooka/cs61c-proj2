@@ -53,8 +53,8 @@ unsigned write_pass_one(FILE* output, const char* name, char** args, int num_arg
         if (num_args != 2) {
             return 0;
         }
-        long int imm;
-        translate_num(&imm, args[2], INT16_MIN, INT16_MAX);
+        long int imm = 0;
+        translate_num(&imm, args[1], INT16_MIN, INT16_MAX);
         if (imm < TWO_POW_SEVENTEEN) {
             fprintf(output, "addiu %s %s $0\n", args[0], args[1]);
             return 1;
