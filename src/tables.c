@@ -67,10 +67,7 @@ void free_table(SymbolTable* table) {
     for(int i = 0; i<table->len; i++) { 
         if (&(table->tbl[i])) {
             free(table->tbl[i].name); 
-            //free(&(table->tbl[i])); 
-        }
-           
-        
+        }     
     }
     free(table->tbl);
     free(table);
@@ -125,9 +122,6 @@ int add_to_table(SymbolTable* table, const char* name, uint32_t addr) {
         table->cap *= SCALING_FACTOR;
     }
     Symbol * mapping = &(table->tbl[table->len]);
-    // if (!mapping) {
-    //     allocation_failed();
-    // }
     mapping->name = create_copy_of_str(name);
     mapping->addr = addr;
     table->tbl[table->len] = *mapping;
