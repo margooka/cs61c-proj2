@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #include "tables.h"
 #include "translate_utils.h"
@@ -53,15 +54,16 @@ unsigned write_pass_one(FILE* output, const char* name, char** args, int num_arg
         if (num_args != 2) {
             return 0;
         }
-        long int imm = 0;
-        translate_num(&imm, args[1], INT16_MIN, INT16_MAX);
-        if (imm < TWO_POW_SEVENTEEN) {
-            fprintf(output, "addiu %s %s $0\n", args[0], args[1]);
+        long int imm;
+        translate_num(&imm, args[1], LONG_MIN, LONG_MAX);
+        if (imm < 65536) {
+   //printf("IMMEDIATE THAT IS SMALLER THAN 2^16 is %ld\n", imm);       
+            fprintf(output, "addiu %s $0 %s\n", args[0], args[1]);
             return 1;
         }
         else {
-            fprintf(output, "lui %s %s\n", args[0], args[1]);
-            fprintf(output, "ori %s %s\n", args[0], args[1]);
+            fprintf(output, "lui $at %ld\n", imm>>16);
+            fprintf(output, "ori %s $at %ld\n", args[0], imm & 0xFFFF);
             return 2;
         }
     } else if (strcmp(name, "push") == 0) {
@@ -258,8 +260,7 @@ int write_addiu(uint8_t opcode, FILE* output, char** args, size_t num_args) {
     if (err == -1) {
       return -1;
     }
-
-    uint32_t instruction = imm + (rt << 16) + (rs << 21) + (opcode <<26);
+    uint32_t instruction = (imm & 0xFFFF) + (rt << 16) + (rs << 21) + (opcode <<26);
     write_inst_hex(output, instruction);
     return 0;
 }
@@ -283,7 +284,7 @@ int write_ori(uint8_t opcode, FILE* output, char** args, size_t num_args) {
       return -1;
     }
 
-    uint32_t instruction = imm + (rt << 16) + (rs << 21) + (opcode << 26);
+    uint32_t instruction = (imm & 0xFFFF) + (rt << 16) + (rs << 21) + (opcode << 26);
     write_inst_hex(output, instruction);
     return 0;
 }
@@ -345,7 +346,7 @@ int write_lui(uint8_t opcode, FILE* output, char** args, size_t num_args) {
       return -1;
     }
 
-    uint32_t instruction = imm + (rt << 16) + (opcode << 26);
+    uint32_t instruction = (imm & 0xFFFF) + (rt << 16) + (opcode << 26);
     write_inst_hex(output, instruction);
     return 0;
 }
@@ -369,7 +370,7 @@ int write_mem(uint8_t opcode, FILE* output, char** args, size_t num_args) {
       return -1;
     }
 
-    uint32_t instruction = imm + (rt << 16) + (rs << 21) + (opcode << 26);
+    uint32_t instruction = (imm & 0xFFFF) + (rt << 16) + (rs << 21) + (opcode << 26);
     write_inst_hex(output, instruction);
     return 0;
 }
