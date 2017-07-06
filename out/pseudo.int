@@ -1,6 +1,4 @@
-addiu $v0 $0 10
-addiu $a1 $0 -6000
-lui $at 1
-ori $a2 $at 14464
-lui $at 45242
-ori $a3 $at 51966
+addiu $v0 10 $0
+addiu $a1 -6000 $0
+addiu $a2 80000 $0
+addiu $a3 0xB0BACAFE $0
