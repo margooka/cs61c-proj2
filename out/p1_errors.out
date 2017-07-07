@@ -3,13 +3,12 @@
 01200008
 0150502a
 3c0b007b
-82080000
 0c000000
 354b0abc
 
 .symbol
 0	label
-24	l1
+20	l1
 
 .relocation
-20	label
+16	label

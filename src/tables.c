@@ -1,5 +1,4 @@
-
-#include <stdio.h>
+   #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -50,6 +49,7 @@ SymbolTable* create_table(int mode) {
     }
     s->tbl = (Symbol*) malloc(INITIAL_SIZE*sizeof(Symbol));
     if (!s->tbl) {
+        free(s);
         allocation_failed();
     }
     s->len = 0;
@@ -78,7 +78,8 @@ static char* create_copy_of_str(const char* str) {
     size_t len = strlen(str) + 1;
     char *buf = (char *) malloc(len);
     if (!buf) {
-       allocation_failed();
+        free(buf);
+        allocation_failed();
     }
     strncpy(buf, str, len); 
     return buf;
@@ -133,6 +134,9 @@ int add_to_table(SymbolTable* table, const char* name, uint32_t addr) {
    NAME is not present in TABLE, return -1.
  */
 int64_t get_addr_for_symbol(SymbolTable* table, const char* name) {
+    if (!table) {
+        return -1;
+    }
     for(int i = 0; i<table->len; i++) {
         if (strcmp(table->tbl[i].name, name) == 0) {
             return table->tbl[i].addr;

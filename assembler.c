@@ -158,6 +158,7 @@ int pass_one(FILE* input, FILE* output, SymbolTable* symtbl) {
         int is_label = add_if_label(input_line, token, byte_offset, symtbl);
         if (is_label == -1) {
             ret_code = -1;
+            continue;
         }
         if (is_label != 0) {
             token = strtok(NULL, IGNORE_CHARS);

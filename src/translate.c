@@ -124,7 +124,7 @@ unsigned write_pass_one(FILE* output, const char* name, char** args, int num_arg
  */
 int translate_inst(FILE* output, const char* name, char** args, size_t num_args, uint32_t addr,
     SymbolTable* symtbl, SymbolTable* reltbl) {
-    if (!name || !args || !num_args) {
+    if (!output || !name || !args || !num_args) {
       return -1;
     }
     if (strcmp(name, "beq") == 0 || strcmp(name, "bne") == 0) {
@@ -173,7 +173,7 @@ int translate_inst(FILE* output, const char* name, char** args, size_t num_args,
  */
 int write_rtype(uint8_t funct, FILE* output, char** args, size_t num_args) {
     // Perhaps perform some error checking?
-    if (!args || num_args != 3) {
+    if (num_args != 3) {
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
@@ -202,7 +202,7 @@ int write_rtype(uint8_t funct, FILE* output, char** args, size_t num_args) {
  */
 int write_shift(uint8_t funct, FILE* output, char** args, size_t num_args) {
 	// Perhaps perform some error checking?
-    if (!args || num_args != 3) {
+    if (num_args != 3) {
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
@@ -218,7 +218,6 @@ int write_shift(uint8_t funct, FILE* output, char** args, size_t num_args) {
     if (err == -1 || rd == -1 || rt == -1) {
       return -1;
     }
-
     uint32_t instruction = funct + (shamt << 6) + (rd << 11) + (rt << 16);
     write_inst_hex(output, instruction);
     return 0;
@@ -228,12 +227,11 @@ int write_shift(uint8_t funct, FILE* output, char** args, size_t num_args) {
 
 int write_jr(uint8_t funct, FILE* output, char** args, size_t num_args) {
     // Perhaps perform some error checking?
-    if (!args || num_args != 1) {
+    if (num_args != 1) {
       return -1;
     }
 
     int rs = translate_reg(args[0]);
-
     uint32_t instruction = funct + (rs << 21);
     write_inst_hex(output, instruction);
     if (rs == -1) {
@@ -244,7 +242,7 @@ int write_jr(uint8_t funct, FILE* output, char** args, size_t num_args) {
 
 int write_addiu(uint8_t opcode, FILE* output, char** args, size_t num_args) {
     // Perhaps perform some error checking?
-    if (!args || num_args != 3) {
+    if (num_args != 3) {
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
@@ -268,7 +266,7 @@ int write_addiu(uint8_t opcode, FILE* output, char** args, size_t num_args) {
 
 int write_ori(uint8_t opcode, FILE* output, char** args, size_t num_args) {
     // Perhaps perform some error checking?
-    if (!args || num_args != 3) {
+    if (num_args != 3) {
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
@@ -292,7 +290,7 @@ int write_ori(uint8_t opcode, FILE* output, char** args, size_t num_args) {
 
 int write_mult_div(uint8_t funct, FILE* output, char** args, size_t num_args) {
     	// Perhaps perform some error checking?
-  if (!args || num_args != 2) {
+  if (num_args != 2) {
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
@@ -304,7 +302,7 @@ int write_mult_div(uint8_t funct, FILE* output, char** args, size_t num_args) {
 	int rs = translate_reg(args[0]);
 	int rt = translate_reg(args[1]);
 		        
-	if (rs < 0 || rt < 0) {
+	if (rs == -1 || rt == -1) {
 		return -1;
 	}
 			    
@@ -315,12 +313,12 @@ int write_mult_div(uint8_t funct, FILE* output, char** args, size_t num_args) {
 
 int write_mfhi_mflo(uint8_t funct, FILE* output, char** args, size_t num_args) {
     	// Perhaps perform some error checking?
-  if (!args || num_args != 1 || !args[0]) {
+  if (num_args != 1 || !args[0]) {
     return -1;
   }
 
 	int rd = translate_reg(args[0]);
-	if (rd < 0) {
+	if (rd == -1) {
 		return -1;
 	}
 
@@ -331,7 +329,7 @@ int write_mfhi_mflo(uint8_t funct, FILE* output, char** args, size_t num_args) {
 
 int write_lui(uint8_t opcode, FILE* output, char** args, size_t num_args) {
     // Perhaps perform some error checking?
-    if (!args || num_args != 2) {
+    if (num_args != 2) {
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
@@ -354,7 +352,7 @@ int write_lui(uint8_t opcode, FILE* output, char** args, size_t num_args) {
 
 int write_mem(uint8_t opcode, FILE* output, char** args, size_t num_args) {
     // Perhaps perform some error checking?
-    if (!args || num_args != 3) {
+    if (num_args != 3) {
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
@@ -387,7 +385,7 @@ static int can_branch_to(uint32_t src_addr, uint32_t dest_addr) {
 
 int write_branch(uint8_t opcode, FILE* output, char** args, size_t num_args, uint32_t addr, SymbolTable* symtbl) {
     // Perhaps perform some error checking?
-    if (!args || num_args != 3) {
+    if (num_args != 3) {
       return -1;
     }
     for (int i = 0; i < num_args; i++) {
